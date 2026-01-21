@@ -1,0 +1,16 @@
+services:
+  scorecard:
+    build: .
+    container_name: scorecard
+    ports:
+      - "3005:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      SOURCE_SPREADSHEET: /app/assets/IT Scorecard 2026.xlsx
+      SCORECARD_WEEKLY_SHEET: EOS 2026
+      SCORECARD_MONTHLY_SHEET: IT Monthly 2026
+    volumes:
+      - ./assets:/app/assets
+      - ./.cache:/app/.cache
+    restart: unless-stopped
