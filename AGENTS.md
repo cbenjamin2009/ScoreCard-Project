@@ -1,5 +1,14 @@
 # Repository Guidelines
 
+## Context Summary (Scorecard Report)
+- Workbook default is `assets/IT Scorecard 2026.xlsx` with weekly sheet `EOS 2026` and monthly sheet `IT Monthly 2026`.
+- Weekly cadence uses a rolling 4-week window and sorts columns by actual date order.
+- Panic thresholds are parsed from the “Panic #” column; comparator supports "More than/Greater than/Above" and "Less than/Below".
+- Executive Summary groups by category and includes Panic + Latest values with a threshold indicator arrow.
+- Overall score gauge (grade + percent) is known good and should remain on the first PDF page.
+- Metric cards show sparklines with subtle axis labels and point markers; ensure trends remain chronological.
+- Print/PDF hides the trend focus section, trims card spacing, and forces each category to a new page.
+
 ## Project Structure & Module Organization
 - Core data loaders live in `lib/`, e.g., `lib/scorecard.js` (Excel ingestion) and `lib/metrics.js` (filter helpers). Keep those pure so both API routes and pages can reuse them.
 - UI lives in `components/` and `pages/`; reuse presentational components (`MetricCard`, `MetricChart`) rather than embedding JSX in pages.
@@ -35,3 +44,7 @@
 - Review dependency changes with `npm audit` before merging; note high-severity issues in the PR description with remediation steps.
 - Parsed scorecard payloads are cached by default under `.cache/`; tune `SCORECARD_CACHE_MODE`/`SCORECARD_CACHE_DIR` or clear the folder if values look stale.
 - The upload endpoint (`/api/upload`) overwrites whatever file `SOURCE_SPREADSHEET` points to. Make sure that path is writable locally and never exposes sensitive data in shared environments.
+
+## Deployment Notes
+- Docker deployment uses `docker-compose.yml` with port `3005:3000` and a standalone Next.js build.
+- Keep `assets/` in the repo but ignore uploaded files; ensure the workbook exists on the Docker host under `/srv/scorecard/assets/`.

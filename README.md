@@ -1,6 +1,6 @@
 # IT Scorecard Dashboard
 
-Next.js application that reads weekly and monthly scorecard worksheets from the Excel workbook (`assets/IT Scorecard 2026.xlsx`) and renders the data in a leadership-ready dashboard with cards, tables, and charts.
+Next.js application that reads weekly and monthly scorecard worksheets from the Excel workbook (`assets/IT Scorecard 2026.xlsx`) and renders a leadership-ready dashboard with cards, tables, charts, and a PDF export.
 
 ## Prerequisites
 
@@ -33,7 +33,7 @@ Next.js application that reads weekly and monthly scorecard worksheets from the 
 
 ## Architecture Notes
 
-- Backend parsing logic lives in `lib/scorecard.js`. It uses `xlsx` to ingest the workbook, normalizes categories/metrics, and exposes `getScorecardData()` for both API routes and server-side rendering (weekly uses a rolling 4-week window, monthly shows year-to-date).
+- Backend parsing logic lives in `lib/scorecard.js`. It uses `xlsx` to ingest the workbook, normalizes categories/metrics, and exposes `getScorecardData()` for both API routes and server-side rendering (weekly uses a rolling 4-week window, monthly shows year-to-date). Weekly columns are sorted by actual dates to keep trends chronological.
 - API route `pages/api/scorecard.js` returns the parsed JSON payload should you want to integrate with other front-ends.
 - The UI lives in `pages/index.jsx` and composes reusable components under `components/` (`ScorecardDashboard`, `MetricCard`, `MetricChart`) with styling in `styles/globals.css`.
 - Charts rely on `react-chartjs-2`/`chart.js`. If you deploy beyond local, consider persisting the parsed results or protecting the workbook path with environment variables.
@@ -43,7 +43,7 @@ Next.js application that reads weekly and monthly scorecard worksheets from the 
 
 - Search, category pills, and status toggles live at the top of the dashboard so you can quickly narrow the metrics list (all grids respect the active filters).
 - Use the “Refresh data” button whenever the Excel workbook is updated; it calls `/api/scorecard` and rehydrates the dashboard without a page reload. Errors surface inline.
-- Metric cards now include inline sparklines so you can quickly see the recent trend for each KPI without opening the full chart. The header shows the last refresh timestamp, the workbook’s last modified time, and a relative “x mins ago” badge so stakeholders can judge data freshness at a glance.
+- Metric cards include inline sparklines with subtle axes (min/max + first/last period labels) and point markers to make week-to-week changes visible. The header shows the last refresh timestamp, the workbook’s last modified time, and a relative “x mins ago” badge so stakeholders can judge data freshness at a glance.
 - Drag-and-drop a new workbook (or click to browse) in the “Upload updated workbook” panel; uploads are handled by `/api/upload`, the file overwrites `SOURCE_SPREADSHEET`, and the dashboard refreshes automatically on success.
 
 ## Configuration
@@ -54,6 +54,12 @@ Next.js application that reads weekly and monthly scorecard worksheets from the 
 - `SCORECARD_WEEKLY_SHEET` – override the weekly worksheet name (defaults to `EOS 2026`).
 - `SCORECARD_MONTHLY_SHEET` – override the monthly worksheet name (defaults to `IT Monthly 2026`).
 - Run `npm run cache:clear` whenever you need to force a refresh without changing the workbook.
+
+## Report Behavior Notes
+
+- Executive Summary table groups metrics by category and includes Panic + Latest values with a threshold indicator arrow.
+- The cadence header includes an overall score gauge (grade + percent) based on on-track count / total metrics.
+- Print/PDF output hides the detail trend section, trims card spacing, and forces each category to a new page for readability.
 
 ## Docker Deployment (Internal Server)
 
