@@ -83,5 +83,5 @@ Next.js application that reads weekly and monthly scorecard worksheets from the 
 cd /srv/scorecard
 git fetch
 git pull
-docker compose restart scorecard
+docker compose up -d --build
 ```
