@@ -59,6 +59,7 @@ Next.js application that reads weekly and monthly scorecard worksheets from the 
 
 - Executive Summary table groups metrics by category and includes Panic + Latest values with a threshold indicator arrow.
 - The cadence header includes an overall score gauge (grade + percent) based on on-track count / total metrics.
+- The upload panel exposes a download link for the latest workbook with filename + last-updated timestamp.
 - Print/PDF output hides the detail trend section, trims card spacing, and forces each category to a new page for readability.
 
 ## Docker Deployment (Internal Server)
