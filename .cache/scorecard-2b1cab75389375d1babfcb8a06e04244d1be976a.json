@@ -1,0 +1,634 @@
+{
+  "meta": {
+    "workbookPath": "/home/master/Development/ScoreCard Project/assets/IT Scorecard 2026.xlsx",
+    "sheetName": "EOS 2026",
+    "sourceMtimeMs": 1769020731275.4556,
+    "cachedAt": "2026-01-21T19:16:58.679Z"
+  },
+  "payload": {
+    "sheetName": "EOS 2026",
+    "source": "/home/master/Development/ScoreCard Project/assets/IT Scorecard 2026.xlsx",
+    "generatedAt": "2026-01-21T19:16:58.679Z",
+    "cadence": "weekly",
+    "cadenceLabel": "Weekly",
+    "periods": [
+      "Dec 29",
+      "Jan 5",
+      "Jan 12"
+    ],
+    "metrics": [
+      {
+        "id": "operational-stability-unplanned-business-disruptions",
+        "category": "Operational Stability",
+        "name": "Unplanned Business Disruptions",
+        "description": "Unplanned Incidents causing disruption to 1 or more business services or applications",
+        "panic": {
+          "text": "P: More than 2",
+          "threshold": 2,
+          "comparator": "more",
+          "isPercent": false
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "0",
+            "value": 0
+          },
+          {
+            "period": "Jan 5",
+            "raw": "1",
+            "value": 1
+          },
+          {
+            "period": "Jan 12",
+            "raw": "2",
+            "value": 2
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "2",
+          "value": 2,
+          "display": "2"
+        },
+        "status": "on-track"
+      },
+      {
+        "id": "operational-stability-average-time-to-restore-service",
+        "category": "Operational Stability",
+        "name": "Average Time to Restore Service",
+        "description": "Average Time to solve unplanned incidents",
+        "panic": {
+          "text": "P: More than 8 hours",
+          "threshold": 8,
+          "comparator": "more",
+          "isPercent": false
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "0",
+            "value": 0
+          },
+          {
+            "period": "Jan 5",
+            "raw": "0.01",
+            "value": 0.01
+          },
+          {
+            "period": "Jan 12",
+            "raw": "0.3",
+            "value": 0.3
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "0.3",
+          "value": 0.3,
+          "display": "0.3"
+        },
+        "status": "on-track"
+      },
+      {
+        "id": "operational-stability-critical-system-uptime",
+        "category": "Operational Stability",
+        "name": "Critical System Uptime",
+        "description": "Total duration tickets where Impact is (Crisis, Major, Site Down, or Sever Issue) subtracting 240 work hours",
+        "panic": {
+          "text": "P: Less than 95%",
+          "threshold": 0.95,
+          "comparator": "less",
+          "isPercent": true
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "0.9595",
+            "value": 0.9595
+          },
+          {
+            "period": "Jan 5",
+            "raw": "0.9999",
+            "value": 0.9999
+          },
+          {
+            "period": "Jan 12",
+            "raw": "0.995",
+            "value": 0.995
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "0.995",
+          "value": 0.995,
+          "display": "0.995"
+        },
+        "status": "on-track"
+      },
+      {
+        "id": "operational-stability-repeat-system-issues",
+        "category": "Operational Stability",
+        "name": "Repeat System Issues",
+        "description": "Change tickets where system is the same on more than 1 ticket per system",
+        "panic": {
+          "text": "P: More than 1",
+          "threshold": 1,
+          "comparator": "more",
+          "isPercent": false
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "0",
+            "value": 0
+          },
+          {
+            "period": "Jan 5",
+            "raw": "0",
+            "value": 0
+          },
+          {
+            "period": "Jan 12",
+            "raw": "2",
+            "value": 2
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "2",
+          "value": 2,
+          "display": "2"
+        },
+        "status": "at-risk"
+      },
+      {
+        "id": "service-effectiveness-team-support-support-requets-per-team-member",
+        "category": "Service Effectiveness (Team Support)",
+        "name": "Support Requets per Team Member",
+        "description": "Support Load - User Tickets divided by Users",
+        "panic": {
+          "text": "P: More than 2",
+          "threshold": 2,
+          "comparator": "more",
+          "isPercent": false
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "0.10759493670886076",
+            "value": 0.10759493670886076
+          },
+          {
+            "period": "Jan 5",
+            "raw": "0.2",
+            "value": 0.2
+          },
+          {
+            "period": "Jan 12",
+            "raw": "0.2302158273381295",
+            "value": 0.2302158273381295
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "0.2302158273381295",
+          "value": 0.2302158273381295,
+          "display": "0.2302158273381295"
+        },
+        "status": "on-track"
+      },
+      {
+        "id": "service-effectiveness-team-support-average-team-member-issue-resolution-time",
+        "category": "Service Effectiveness (Team Support)",
+        "name": "Average Team Member Issue Resolution Time",
+        "description": "Average Team Member Ticket Duration - AVG time team member ticket was open (8 hours = 1 day)",
+        "panic": {
+          "text": "P: More than 24 Hours",
+          "threshold": 24,
+          "comparator": "more",
+          "isPercent": false
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "32.47",
+            "value": 32.47
+          },
+          {
+            "period": "Jan 5",
+            "raw": "13.79",
+            "value": 13.79
+          },
+          {
+            "period": "Jan 12",
+            "raw": "6.87",
+            "value": 6.87
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "6.87",
+          "value": 6.87,
+          "display": "6.87"
+        },
+        "status": "on-track"
+      },
+      {
+        "id": "service-effectiveness-team-support-issues-resolved-on-time",
+        "category": "Service Effectiveness (Team Support)",
+        "name": "Issues Resolved On Time",
+        "description": "User issues resolved within 2 business days (16 work hours)",
+        "panic": {
+          "text": "P: Less than 85%",
+          "threshold": 0.85,
+          "comparator": "less",
+          "isPercent": true
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "0.9024",
+            "value": 0.9024
+          },
+          {
+            "period": "Jan 5",
+            "raw": "0.8065",
+            "value": 0.8065
+          },
+          {
+            "period": "Jan 12",
+            "raw": "0.7742",
+            "value": 0.7742
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "0.7742",
+          "value": 0.7742,
+          "display": "0.7742"
+        },
+        "status": "at-risk"
+      },
+      {
+        "id": "service-effectiveness-team-support-user-satisfaction-score",
+        "category": "Service Effectiveness (Team Support)",
+        "name": "User Satisfaction Score",
+        "description": "Ticket Rating, up to 5 points per survey, average score is used of all surveys in time period",
+        "panic": {
+          "text": "P: Less than 85%",
+          "threshold": 0.85,
+          "comparator": "less",
+          "isPercent": true
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "1",
+            "value": 1
+          },
+          {
+            "period": "Jan 5",
+            "raw": "1",
+            "value": 1
+          },
+          {
+            "period": "Jan 12",
+            "raw": "0.988",
+            "value": 0.988
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "0.988",
+          "value": 0.988,
+          "display": "0.988"
+        },
+        "status": "on-track"
+      },
+      {
+        "id": "service-effectiveness-team-support-total-team-member-tickets",
+        "category": "Service Effectiveness (Team Support)",
+        "name": "Total Team Member Tickets",
+        "description": "Tickets generated by a team member",
+        "panic": {
+          "text": "P: More than 50",
+          "threshold": 50,
+          "comparator": "more",
+          "isPercent": false
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "17",
+            "value": 17
+          },
+          {
+            "period": "Jan 5",
+            "raw": "31",
+            "value": 31
+          },
+          {
+            "period": "Jan 12",
+            "raw": "37",
+            "value": 37
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "37",
+          "value": 37,
+          "display": "37"
+        },
+        "status": "on-track"
+      },
+      {
+        "id": "system-changes-reliability-successful-system-changes",
+        "category": "System Changes & Reliability",
+        "name": "Successful System Changes",
+        "description": "Changes where no subsequent incidents occurred",
+        "panic": {
+          "text": "P: Less than 90%",
+          "threshold": 0.9,
+          "comparator": "less",
+          "isPercent": true
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "0",
+            "value": 0
+          },
+          {
+            "period": "Jan 5",
+            "raw": "1",
+            "value": 1
+          },
+          {
+            "period": "Jan 12",
+            "raw": "0.8333",
+            "value": 0.8333
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "0.8333",
+          "value": 0.8333,
+          "display": "0.8333"
+        },
+        "status": "at-risk"
+      },
+      {
+        "id": "system-changes-reliability-emergency-system-changes",
+        "category": "System Changes & Reliability",
+        "name": "Emergency System Changes",
+        "description": "Emergency Change Tickets",
+        "panic": {
+          "text": "P: More  than 2",
+          "threshold": 2,
+          "comparator": "more",
+          "isPercent": false
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "0",
+            "value": 0
+          },
+          {
+            "period": "Jan 5",
+            "raw": "1",
+            "value": 1
+          },
+          {
+            "period": "Jan 12",
+            "raw": "0",
+            "value": 0
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "0",
+          "value": 0,
+          "display": "0"
+        },
+        "status": "on-track"
+      },
+      {
+        "id": "system-changes-reliability-changes-causing-disruption",
+        "category": "System Changes & Reliability",
+        "name": "Changes Causing Disruption",
+        "description": "Changes where incident did occur 'Server Down, Site Down, or Critical'",
+        "panic": {
+          "text": "P: More than 1",
+          "threshold": 1,
+          "comparator": "more",
+          "isPercent": false
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "0",
+            "value": 0
+          },
+          {
+            "period": "Jan 5",
+            "raw": "2",
+            "value": 2
+          },
+          {
+            "period": "Jan 12",
+            "raw": "1",
+            "value": 1
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "1",
+          "value": 1,
+          "display": "1"
+        },
+        "status": "on-track"
+      },
+      {
+        "id": "system-changes-reliability-high-impact-system-changes",
+        "category": "System Changes & Reliability",
+        "name": "High-Impact System Changes",
+        "description": "Changes where potential impact was 'Server Down, Site Down, or Critical'",
+        "panic": {
+          "text": "P: More than 2",
+          "threshold": 2,
+          "comparator": "more",
+          "isPercent": false
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "0",
+            "value": 0
+          },
+          {
+            "period": "Jan 5",
+            "raw": "1",
+            "value": 1
+          },
+          {
+            "period": "Jan 12",
+            "raw": "2",
+            "value": 2
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "2",
+          "value": 2,
+          "display": "2"
+        },
+        "status": "on-track"
+      },
+      {
+        "id": "security-risk-critical-security-events",
+        "category": "Security & Risk",
+        "name": "Critical Security Events",
+        "description": "Darktrace EOS Report Critical Incidents requring investigation",
+        "panic": {
+          "text": "P: Greater than 3",
+          "threshold": 3,
+          "comparator": null,
+          "isPercent": false
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "0",
+            "value": 0
+          },
+          {
+            "period": "Jan 5",
+            "raw": "0",
+            "value": 0
+          },
+          {
+            "period": "Jan 12",
+            "raw": "0",
+            "value": 0
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "0",
+          "value": 0,
+          "display": "0"
+        },
+        "status": "unknown"
+      },
+      {
+        "id": "security-risk-critical-systems-fully-patched",
+        "category": "Security & Risk",
+        "name": "Critical Systems Fully Patched",
+        "description": "Critical Windows Patches",
+        "panic": {
+          "text": "P: Less than 95%",
+          "threshold": 0.95,
+          "comparator": "less",
+          "isPercent": true
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "1",
+            "value": 1
+          },
+          {
+            "period": "Jan 5",
+            "raw": "1",
+            "value": 1
+          },
+          {
+            "period": "Jan 12",
+            "raw": "0.988",
+            "value": 0.988
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "0.988",
+          "value": 0.988,
+          "display": "0.988"
+        },
+        "status": "on-track"
+      },
+      {
+        "id": "security-risk-employees-falling-for-phishing",
+        "category": "Security & Risk",
+        "name": "Employees Falling for Phishing",
+        "description": "KnowBe4 - Phishing Campaign Report - Failed Users (Clicked or Responded to simulated phishing email)",
+        "panic": {
+          "text": "P: More than 5%",
+          "threshold": 0.05,
+          "comparator": "more",
+          "isPercent": true
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "0",
+            "value": 0
+          },
+          {
+            "period": "Jan 5",
+            "raw": "0",
+            "value": 0
+          },
+          {
+            "period": "Jan 12",
+            "raw": "0",
+            "value": 0
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "0",
+          "value": 0,
+          "display": "0"
+        },
+        "status": "on-track"
+      },
+      {
+        "id": "security-risk-backups-server-datto-success-rate",
+        "category": "Security & Risk",
+        "name": "Backups (Server/Datto) Success Rate",
+        "description": "Percentage of completed backups",
+        "panic": {
+          "text": "P: Less than 90%",
+          "threshold": 0.9,
+          "comparator": "less",
+          "isPercent": true
+        },
+        "series": [
+          {
+            "period": "Dec 29",
+            "raw": "1",
+            "value": 1
+          },
+          {
+            "period": "Jan 5",
+            "raw": "0.94",
+            "value": 0.94
+          },
+          {
+            "period": "Jan 12",
+            "raw": "1",
+            "value": 1
+          }
+        ],
+        "latest": {
+          "period": "Jan 12",
+          "raw": "1",
+          "value": 1,
+          "display": "1"
+        },
+        "status": "on-track"
+      }
+    ]
+  }
+}
