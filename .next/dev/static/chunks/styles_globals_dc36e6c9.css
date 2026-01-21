@@ -370,6 +370,18 @@ section h2 {
   font-weight: 600;
 }
 
+.upload-panel__actions {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .75rem;
+  display: flex;
+}
+
+.upload-panel__meta {
+  color: var(--text-muted);
+  font-size: .8rem;
+}
+
 .upload-dropzone {
   text-align: center;
   background: #0f766e0d;

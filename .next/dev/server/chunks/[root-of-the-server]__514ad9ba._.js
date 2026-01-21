@@ -11,12 +11,6 @@ const mod = __turbopack_context__.x("next/dist/compiled/next-server/pages-api-tu
 
 module.exports = mod;
 }),
-"[externals]/node:crypto [external] (node:crypto, cjs)", ((__turbopack_context__, module, exports) => {
-
-const mod = __turbopack_context__.x("node:crypto", () => require("node:crypto"));
-
-module.exports = mod;
-}),
 "[externals]/node:fs [external] (node:fs, cjs)", ((__turbopack_context__, module, exports) => {
 
 const mod = __turbopack_context__.x("node:fs", () => require("node:fs"));
@@ -26,6 +20,12 @@ module.exports = mod;
 "[externals]/node:path [external] (node:path, cjs)", ((__turbopack_context__, module, exports) => {
 
 const mod = __turbopack_context__.x("node:path", () => require("node:path"));
+
+module.exports = mod;
+}),
+"[externals]/node:crypto [external] (node:crypto, cjs)", ((__turbopack_context__, module, exports) => {
+
+const mod = __turbopack_context__.x("node:crypto", () => require("node:crypto"));
 
 module.exports = mod;
 }),
@@ -409,22 +409,38 @@ const getScorecardData = ({ cadence = 'weekly' } = {})=>{
     };
 };
 }),
-"[project]/pages/api/scorecard.js [api] (ecmascript)", ((__turbopack_context__) => {
+"[project]/pages/api/download.js [api] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
 __turbopack_context__.s([
     "default",
     ()=>handler
 ]);
+var __TURBOPACK__imported__module__$5b$externals$5d2f$node$3a$fs__$5b$external$5d$__$28$node$3a$fs$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/node:fs [external] (node:fs, cjs)");
+var __TURBOPACK__imported__module__$5b$externals$5d2f$node$3a$path__$5b$external$5d$__$28$node$3a$path$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/node:path [external] (node:path, cjs)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$scorecard$2e$js__$5b$api$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/lib/scorecard.js [api] (ecmascript)");
+;
+;
 ;
 function handler(req, res) {
     try {
-        const cadence = Array.isArray(req.query?.cadence) ? req.query.cadence[0] : req.query?.cadence;
-        const payload = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$scorecard$2e$js__$5b$api$5d$__$28$ecmascript$29$__["getScorecardData"])({
-            cadence
-        });
-        res.status(200).json(payload);
+        const workbookPath = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$scorecard$2e$js__$5b$api$5d$__$28$ecmascript$29$__["resolveWorkbookPath"])();
+        if (!__TURBOPACK__imported__module__$5b$externals$5d2f$node$3a$fs__$5b$external$5d$__$28$node$3a$fs$2c$__cjs$29$__["default"].existsSync(workbookPath)) {
+            return res.status(404).json({
+                message: 'Workbook not found.'
+            });
+        }
+        const fileName = __TURBOPACK__imported__module__$5b$externals$5d2f$node$3a$path__$5b$external$5d$__$28$node$3a$path$2c$__cjs$29$__["default"].basename(workbookPath);
+        const stats = __TURBOPACK__imported__module__$5b$externals$5d2f$node$3a$fs__$5b$external$5d$__$28$node$3a$fs$2c$__cjs$29$__["default"].statSync(workbookPath);
+        if (req.query?.meta) {
+            return res.status(200).json({
+                name: fileName,
+                updatedAt: stats.mtime.toISOString()
+            });
+        }
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        __TURBOPACK__imported__module__$5b$externals$5d2f$node$3a$fs__$5b$external$5d$__$28$node$3a$fs$2c$__cjs$29$__["default"].createReadStream(workbookPath).pipe(res);
     } catch (error) {
         res.status(500).json({
             message: error.message
@@ -434,4 +450,4 @@ function handler(req, res) {
 }),
 ];
 
-//# sourceMappingURL=%5Broot-of-the-server%5D__1dc829cb._.js.map
+//# sourceMappingURL=%5Broot-of-the-server%5D__514ad9ba._.js.map

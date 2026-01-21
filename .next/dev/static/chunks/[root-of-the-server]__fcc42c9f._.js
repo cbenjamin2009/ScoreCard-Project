@@ -1026,6 +1026,14 @@ const readableSize = (bytes)=>{
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
+const formatTimestamp = (timestamp)=>{
+    if (!timestamp) return 'Unknown';
+    try {
+        return new Date(timestamp).toLocaleString();
+    } catch  {
+        return String(timestamp);
+    }
+};
 function UploadPanel({ cadence = 'weekly', onSuccess }) {
     _s();
     const inputRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useRef"])(null);
@@ -1033,6 +1041,27 @@ function UploadPanel({ cadence = 'weekly', onSuccess }) {
     const [isUploading, setIsUploading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [message, setMessage] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])('');
     const [variant, setVariant] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])('muted');
+    const [fileMeta, setFileMeta] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useState"])({
+        name: 'IT Scorecard 2026.xlsx',
+        updatedAt: ''
+    });
+    const loadFileMeta = async ()=>{
+        try {
+            const response = await fetch('/api/download?meta=1');
+            if (!response.ok) return;
+            const data = await response.json();
+            setFileMeta({
+                name: data.name || 'IT Scorecard 2026.xlsx',
+                updatedAt: data.updatedAt || ''
+            });
+        } catch  {
+        /* ignore metadata errors */ }
+    };
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$index$2e$js__$5b$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "UploadPanel.useEffect": ()=>{
+            loadFileMeta();
+        }
+    }["UploadPanel.useEffect"], []);
     const resetState = ()=>{
         setIsDragging(false);
         setIsUploading(false);
@@ -1065,6 +1094,10 @@ function UploadPanel({ cadence = 'weekly', onSuccess }) {
             }
             setVariant('success');
             setMessage('Upload complete. Dashboard refreshed.');
+            setFileMeta({
+                name: result.file?.name || fileMeta.name,
+                updatedAt: result.file?.updatedAt || new Date().toISOString()
+            });
             if (onSuccess) {
                 onSuccess(result.data);
             }
@@ -1095,7 +1128,7 @@ function UploadPanel({ cadence = 'weekly', onSuccess }) {
                 children: "Upload updated workbook"
             }, void 0, false, {
                 fileName: "[project]/components/UploadPanel.jsx",
-                lineNumber: 81,
+                lineNumber: 113,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1103,7 +1136,39 @@ function UploadPanel({ cadence = 'weekly', onSuccess }) {
                 children: "Drag & drop a new .xlsx file or use the button below."
             }, void 0, false, {
                 fileName: "[project]/components/UploadPanel.jsx",
-                lineNumber: 82,
+                lineNumber: 114,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "upload-panel__actions",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
+                        className: "link-button",
+                        href: "/api/download",
+                        children: [
+                            "Download ",
+                            fileMeta.name
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/components/UploadPanel.jsx",
+                        lineNumber: 116,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                        className: "upload-panel__meta",
+                        children: [
+                            "Last updated ",
+                            formatTimestamp(fileMeta.updatedAt)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/components/UploadPanel.jsx",
+                        lineNumber: 119,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/components/UploadPanel.jsx",
+                lineNumber: 115,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1130,7 +1195,7 @@ function UploadPanel({ cadence = 'weekly', onSuccess }) {
                         children: "Drop file here"
                     }, void 0, false, {
                         fileName: "[project]/components/UploadPanel.jsx",
-                        lineNumber: 103,
+                        lineNumber: 141,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1141,7 +1206,7 @@ function UploadPanel({ cadence = 'weekly', onSuccess }) {
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/UploadPanel.jsx",
-                        lineNumber: 104,
+                        lineNumber: 142,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1154,7 +1219,7 @@ function UploadPanel({ cadence = 'weekly', onSuccess }) {
                         children: "Select from computer"
                     }, void 0, false, {
                         fileName: "[project]/components/UploadPanel.jsx",
-                        lineNumber: 105,
+                        lineNumber: 143,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1170,13 +1235,13 @@ function UploadPanel({ cadence = 'weekly', onSuccess }) {
                         }
                     }, void 0, false, {
                         fileName: "[project]/components/UploadPanel.jsx",
-                        lineNumber: 115,
+                        lineNumber: 153,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/UploadPanel.jsx",
-                lineNumber: 83,
+                lineNumber: 121,
                 columnNumber: 7
             }, this),
             isUploading && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1184,7 +1249,7 @@ function UploadPanel({ cadence = 'weekly', onSuccess }) {
                 children: "Uploading..."
             }, void 0, false, {
                 fileName: "[project]/components/UploadPanel.jsx",
-                lineNumber: 128,
+                lineNumber: 166,
                 columnNumber: 23
             }, this),
             message && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1192,17 +1257,17 @@ function UploadPanel({ cadence = 'weekly', onSuccess }) {
                 children: message
             }, void 0, false, {
                 fileName: "[project]/components/UploadPanel.jsx",
-                lineNumber: 129,
+                lineNumber: 167,
                 columnNumber: 19
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/UploadPanel.jsx",
-        lineNumber: 80,
+        lineNumber: 112,
         columnNumber: 5
     }, this);
 }
-_s(UploadPanel, "60LWUbiKV9XQQP3O1Hl4mElsT8E=");
+_s(UploadPanel, "tCeDFI/fVT3kaCM65Qoy3VBrx78=");
 _c = UploadPanel;
 var _c;
 __turbopack_context__.k.register(_c, "UploadPanel");

@@ -1,3 +1,9 @@
 [00:00:01.075] Server  LOG      ✓ Ready in 669ms
 [00:00:04.081] Browser WARN    Tried to use the 'fill' option without the 'Filler' plugin enabled. Please import and register the 'Filler' plugin and make sure it is not disabled in the options
 [00:00:26.193] Server  LOG      ✓ Compiled in 65ms
+[00:09:34.258] Server  LOG      ✓ Compiled in 30ms
+[00:09:40.231] Server  LOG      ✓ Compiled in 35ms
+[00:10:17.121] Server  LOG      ✓ Compiled in 16ms
+[00:10:40.806] Server  LOG      ✓ Compiled in 14ms
+[00:10:47.613] Server  LOG      ✓ Compiled in 24ms
+[00:11:10.304] Browser WARN    Tried to use the 'fill' option without the 'Filler' plugin enabled. Please import and register the 'Filler' plugin and make sure it is not disabled in the options

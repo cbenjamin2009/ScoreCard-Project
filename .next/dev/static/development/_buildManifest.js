@@ -11,6 +11,7 @@ self.__BUILD_MANIFEST = {
     "/",
     "/_app",
     "/_error",
+    "/api/download",
     "/api/scorecard",
     "/api/upload"
   ]
