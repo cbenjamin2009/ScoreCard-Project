@@ -1,2 +1,7 @@
 node_modules
-assets/
+assets/*.xlsx
+assets/*.pdf
+assets/*.png
+assets/*.jpg
+assets/*.jpeg
+assets/*.webp
