@@ -153,19 +153,16 @@ export default function ScorecardDashboard({ initialData }) {
     let raf = null;
 
     const measureHeights = () => {
-      const sections = document.querySelectorAll('.category-section');
-      sections.forEach((section) => {
-        const cards = section.querySelectorAll('.metric-card');
-        let maxHeight = 0;
-        cards.forEach((card) => {
-          card.style.height = 'auto';
-          const height = card.getBoundingClientRect().height;
-          if (height > maxHeight) maxHeight = height;
-        });
-        if (maxHeight > 0) {
-          section.style.setProperty('--card-min-height', `${Math.ceil(maxHeight)}px`);
-        }
+      const cards = document.querySelectorAll('.metric-card');
+      let maxHeight = 0;
+      cards.forEach((card) => {
+        card.style.height = 'auto';
+        const height = card.getBoundingClientRect().height;
+        if (height > maxHeight) maxHeight = height;
       });
+      if (maxHeight > 0) {
+        document.documentElement.style.setProperty('--card-min-height', `${Math.ceil(maxHeight)}px`);
+      }
     };
 
     const scheduleMeasure = () => {
@@ -297,6 +294,7 @@ export default function ScorecardDashboard({ initialData }) {
             <thead>
               <tr>
                 <th>Metric</th>
+                <th>Panic</th>
                 <th>Latest</th>
                 <th>Trend</th>
               </tr>
@@ -305,13 +303,17 @@ export default function ScorecardDashboard({ initialData }) {
               {metricsByCategory.map(({ category, metrics: categoryMetrics }) =>
                 [
                   <tr className="executive-summary__category" key={`summary-${category}-header`}>
-                    <td colSpan={3}>{category}</td>
+                    <td colSpan={4}>{category}</td>
                   </tr>,
                   ...categoryMetrics.map((metric) => {
                     const trend = getThresholdIndicator(metric);
+                    const panicLabel = metric.panic?.text
+                      ? metric.panic.text.replace(/^p:\s*/i, '')
+                      : '—';
                     return (
                       <tr key={`summary-${metric.id}`}>
                         <td>{metric.name}</td>
+                        <td>{panicLabel}</td>
                         <td>{formatMetricValue(metric.latest?.value, { isPercent: metric.panic?.isPercent })}</td>
                         <td>
                           <span className={`trend trend--${trend}`} aria-label={`Threshold indicator ${trend}`}>

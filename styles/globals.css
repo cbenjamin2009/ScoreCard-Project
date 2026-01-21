@@ -344,7 +344,6 @@ section h2 {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  --card-min-height: auto;
 }
 
 .category-header {
@@ -595,7 +594,7 @@ td {
 
 @media (min-width: 960px) {
   .metric-card {
-    height: var(--card-min-height);
+    height: var(--card-min-height, auto);
   }
 }
 
@@ -652,6 +651,11 @@ td {
   }
 
   .metric-detail {
+    display: none;
+  }
+
+  .metric-card__description,
+  .metric-card__category {
     display: none;
   }
 
