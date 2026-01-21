@@ -65,7 +65,8 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$metrics$2e$js__$5b$ss
 ;
 ;
 const SPARKLINE_WIDTH = 140;
-const SPARKLINE_HEIGHT = 36;
+const SPARKLINE_HEIGHT = 44;
+const SPARKLINE_PADDING = 4;
 const STATUS_COLORS = {
     'on-track': '#22c55e',
     'at-risk': '#dc2626',
@@ -83,11 +84,12 @@ const buildSparklinePath = (series = [])=>{
     const max = Math.max(...validValues);
     const range = max - min || 1;
     const step = series.length > 1 ? SPARKLINE_WIDTH / (series.length - 1) : SPARKLINE_WIDTH;
+    const chartHeight = SPARKLINE_HEIGHT - SPARKLINE_PADDING * 2;
     let path = '';
     let prevY = SPARKLINE_HEIGHT / 2;
     values.forEach((value, idx)=>{
         const x = idx * step;
-        const y = value === null ? prevY : SPARKLINE_HEIGHT - (value - min) / range * SPARKLINE_HEIGHT || SPARKLINE_HEIGHT / 2;
+        const y = value === null ? prevY : SPARKLINE_PADDING + (1 - (value - min) / range) * chartHeight || SPARKLINE_HEIGHT / 2;
         if (idx === 0) {
             path = `M ${x} ${y}`;
         } else {
@@ -97,33 +99,143 @@ const buildSparklinePath = (series = [])=>{
     });
     return path;
 };
-const MetricSparkline = ({ series, status })=>{
+const buildSparklinePoints = (series = [])=>{
+    if (!series.length) return [];
+    const values = series.map((point)=>Number.isFinite(point?.value) ? Number(point.value) : null);
+    const validValues = values.filter((value)=>value !== null);
+    if (!validValues.length) return [];
+    const min = Math.min(...validValues);
+    const max = Math.max(...validValues);
+    const range = max - min || 1;
+    const step = series.length > 1 ? SPARKLINE_WIDTH / (series.length - 1) : SPARKLINE_WIDTH;
+    const chartHeight = SPARKLINE_HEIGHT - SPARKLINE_PADDING * 2;
+    let prevY = SPARKLINE_HEIGHT / 2;
+    return values.map((value, idx)=>{
+        const x = idx * step;
+        const y = value === null ? prevY : SPARKLINE_PADDING + (1 - (value - min) / range) * chartHeight || SPARKLINE_HEIGHT / 2;
+        prevY = y;
+        return {
+            x,
+            y,
+            value
+        };
+    });
+};
+const MetricSparkline = ({ series, status, isPercent })=>{
     if (!series?.length) return null;
     const path = buildSparklinePath(series);
+    const points = buildSparklinePoints(series);
     const stroke = STATUS_COLORS[status] || STATUS_COLORS.unknown;
-    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("svg", {
+    const values = series.map((point)=>Number.isFinite(point?.value) ? Number(point.value) : null);
+    const validValues = values.filter((value)=>value !== null);
+    const minValue = validValues.length ? Math.min(...validValues) : null;
+    const maxValue = validValues.length ? Math.max(...validValues) : null;
+    const firstLabel = series[0]?.period || '';
+    const lastLabel = series[series.length - 1]?.period || '';
+    const formattedMin = minValue === null ? '—' : (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$metrics$2e$js__$5b$ssr$5d$__$28$ecmascript$29$__["formatMetricValue"])(minValue, {
+        isPercent
+    });
+    const formattedMax = maxValue === null ? '—' : (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$metrics$2e$js__$5b$ssr$5d$__$28$ecmascript$29$__["formatMetricValue"])(maxValue, {
+        isPercent
+    });
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
         className: "metric-card__sparkline-chart",
-        width: SPARKLINE_WIDTH,
-        height: SPARKLINE_HEIGHT,
-        viewBox: `0 0 ${SPARKLINE_WIDTH} ${SPARKLINE_HEIGHT}`,
-        preserveAspectRatio: "none",
         role: "img",
         "aria-label": "Recent trend sparkline",
-        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("path", {
-            d: path,
-            fill: "none",
-            stroke: stroke,
-            strokeWidth: "2",
-            strokeLinecap: "round",
-            strokeLinejoin: "round"
-        }, void 0, false, {
-            fileName: "[project]/components/MetricCard.jsx",
-            lineNumber: 58,
-            columnNumber: 7
-        }, ("TURBOPACK compile-time value", void 0))
-    }, void 0, false, {
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+                className: "metric-card__sparkline-row",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+                        className: "metric-card__sparkline-axis metric-card__sparkline-axis--y",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
+                                children: formattedMax
+                            }, void 0, false, {
+                                fileName: "[project]/components/MetricCard.jsx",
+                                lineNumber: 86,
+                                columnNumber: 11
+                            }, ("TURBOPACK compile-time value", void 0)),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
+                                children: formattedMin
+                            }, void 0, false, {
+                                fileName: "[project]/components/MetricCard.jsx",
+                                lineNumber: 87,
+                                columnNumber: 11
+                            }, ("TURBOPACK compile-time value", void 0))
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/components/MetricCard.jsx",
+                        lineNumber: 85,
+                        columnNumber: 9
+                    }, ("TURBOPACK compile-time value", void 0)),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("svg", {
+                        width: SPARKLINE_WIDTH,
+                        height: SPARKLINE_HEIGHT,
+                        viewBox: `0 0 ${SPARKLINE_WIDTH} ${SPARKLINE_HEIGHT}`,
+                        preserveAspectRatio: "none",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("path", {
+                                d: path,
+                                fill: "none",
+                                stroke: stroke,
+                                strokeWidth: "2",
+                                strokeLinecap: "round",
+                                strokeLinejoin: "round"
+                            }, void 0, false, {
+                                fileName: "[project]/components/MetricCard.jsx",
+                                lineNumber: 95,
+                                columnNumber: 11
+                            }, ("TURBOPACK compile-time value", void 0)),
+                            points.map((point, idx)=>point.value === null ? null : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("circle", {
+                                    cx: point.x,
+                                    cy: point.y,
+                                    r: "2.4",
+                                    fill: stroke
+                                }, `pt-${idx}`, false, {
+                                    fileName: "[project]/components/MetricCard.jsx",
+                                    lineNumber: 105,
+                                    columnNumber: 15
+                                }, ("TURBOPACK compile-time value", void 0)))
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/components/MetricCard.jsx",
+                        lineNumber: 89,
+                        columnNumber: 9
+                    }, ("TURBOPACK compile-time value", void 0))
+                ]
+            }, void 0, true, {
+                fileName: "[project]/components/MetricCard.jsx",
+                lineNumber: 84,
+                columnNumber: 7
+            }, ("TURBOPACK compile-time value", void 0)),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+                className: "metric-card__sparkline-axis metric-card__sparkline-axis--x",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
+                        children: firstLabel
+                    }, void 0, false, {
+                        fileName: "[project]/components/MetricCard.jsx",
+                        lineNumber: 111,
+                        columnNumber: 9
+                    }, ("TURBOPACK compile-time value", void 0)),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
+                        children: lastLabel
+                    }, void 0, false, {
+                        fileName: "[project]/components/MetricCard.jsx",
+                        lineNumber: 112,
+                        columnNumber: 9
+                    }, ("TURBOPACK compile-time value", void 0))
+                ]
+            }, void 0, true, {
+                fileName: "[project]/components/MetricCard.jsx",
+                lineNumber: 110,
+                columnNumber: 7
+            }, ("TURBOPACK compile-time value", void 0))
+        ]
+    }, void 0, true, {
         fileName: "[project]/components/MetricCard.jsx",
-        lineNumber: 49,
+        lineNumber: 83,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };
@@ -147,7 +259,7 @@ function MetricCard({ metric, index = 0 }) {
                 children: metric.category
             }, void 0, false, {
                 fileName: "[project]/components/MetricCard.jsx",
-                lineNumber: 77,
+                lineNumber: 132,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h3", {
@@ -155,7 +267,7 @@ function MetricCard({ metric, index = 0 }) {
                 children: metric.name
             }, void 0, false, {
                 fileName: "[project]/components/MetricCard.jsx",
-                lineNumber: 78,
+                lineNumber: 133,
                 columnNumber: 7
             }, this),
             metric.description && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -163,7 +275,7 @@ function MetricCard({ metric, index = 0 }) {
                 children: metric.description
             }, void 0, false, {
                 fileName: "[project]/components/MetricCard.jsx",
-                lineNumber: 79,
+                lineNumber: 134,
                 columnNumber: 30
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -180,7 +292,7 @@ function MetricCard({ metric, index = 0 }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/MetricCard.jsx",
-                                lineNumber: 82,
+                                lineNumber: 137,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -188,13 +300,13 @@ function MetricCard({ metric, index = 0 }) {
                                 children: latestValue
                             }, void 0, false, {
                                 fileName: "[project]/components/MetricCard.jsx",
-                                lineNumber: 83,
+                                lineNumber: 138,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/MetricCard.jsx",
-                        lineNumber: 81,
+                        lineNumber: 136,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -204,7 +316,7 @@ function MetricCard({ metric, index = 0 }) {
                                 children: "Panic"
                             }, void 0, false, {
                                 fileName: "[project]/components/MetricCard.jsx",
-                                lineNumber: 86,
+                                lineNumber: 141,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -212,19 +324,19 @@ function MetricCard({ metric, index = 0 }) {
                                 children: panicText
                             }, void 0, false, {
                                 fileName: "[project]/components/MetricCard.jsx",
-                                lineNumber: 87,
+                                lineNumber: 142,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/MetricCard.jsx",
-                        lineNumber: 85,
+                        lineNumber: 140,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/MetricCard.jsx",
-                lineNumber: 80,
+                lineNumber: 135,
                 columnNumber: 7
             }, this),
             sparklineSeries?.length > 1 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -232,15 +344,16 @@ function MetricCard({ metric, index = 0 }) {
                 "aria-hidden": "true",
                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(MetricSparkline, {
                     series: sparklineSeries,
-                    status: metric.status || 'unknown'
+                    status: metric.status || 'unknown',
+                    isPercent: metric.panic?.isPercent
                 }, void 0, false, {
                     fileName: "[project]/components/MetricCard.jsx",
-                    lineNumber: 92,
+                    lineNumber: 147,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/MetricCard.jsx",
-                lineNumber: 91,
+                lineNumber: 146,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("footer", {
@@ -251,7 +364,7 @@ function MetricCard({ metric, index = 0 }) {
                         children: (metric.status || 'unknown').replace('-', ' ')
                     }, void 0, false, {
                         fileName: "[project]/components/MetricCard.jsx",
-                        lineNumber: 96,
+                        lineNumber: 155,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
@@ -259,19 +372,19 @@ function MetricCard({ metric, index = 0 }) {
                         children: metric.panic?.isPercent ? 'Percent-based' : 'Absolute value'
                     }, void 0, false, {
                         fileName: "[project]/components/MetricCard.jsx",
-                        lineNumber: 97,
+                        lineNumber: 156,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/MetricCard.jsx",
-                lineNumber: 95,
+                lineNumber: 154,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/MetricCard.jsx",
-        lineNumber: 76,
+        lineNumber: 131,
         columnNumber: 5
     }, this);
 }
@@ -692,6 +805,161 @@ const CADENCE_COPY = {
         helper: 'Year-to-date view'
     }
 };
+const getLetterGrade = (percent)=>{
+    if (percent >= 90) return 'A';
+    if (percent >= 80) return 'B';
+    if (percent >= 70) return 'C';
+    if (percent >= 60) return 'D';
+    return 'F';
+};
+const ScoreGauge = ({ percent })=>{
+    const clamped = Math.max(0, Math.min(100, percent));
+    const grade = getLetterGrade(clamped);
+    const radius = 80;
+    const stroke = 14;
+    const normalizedRadius = radius - stroke / 2;
+    const circumference = normalizedRadius * Math.PI;
+    const dashOffset = circumference * (1 - clamped / 100);
+    const angle = -90 + clamped / 100 * 180;
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+        className: "score-gauge",
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("svg", {
+                viewBox: "0 0 200 120",
+                role: "img",
+                "aria-label": `Overall score ${clamped}%`,
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("defs", {
+                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("linearGradient", {
+                            id: "score-gradient",
+                            x1: "0%",
+                            y1: "0%",
+                            x2: "100%",
+                            y2: "0%",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("stop", {
+                                    offset: "0%",
+                                    stopColor: "#dc2626"
+                                }, void 0, false, {
+                                    fileName: "[project]/components/ScorecardDashboard.jsx",
+                                    lineNumber: 69,
+                                    columnNumber: 13
+                                }, ("TURBOPACK compile-time value", void 0)),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("stop", {
+                                    offset: "50%",
+                                    stopColor: "#f59e0b"
+                                }, void 0, false, {
+                                    fileName: "[project]/components/ScorecardDashboard.jsx",
+                                    lineNumber: 70,
+                                    columnNumber: 13
+                                }, ("TURBOPACK compile-time value", void 0)),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("stop", {
+                                    offset: "100%",
+                                    stopColor: "#16a34a"
+                                }, void 0, false, {
+                                    fileName: "[project]/components/ScorecardDashboard.jsx",
+                                    lineNumber: 71,
+                                    columnNumber: 13
+                                }, ("TURBOPACK compile-time value", void 0))
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/components/ScorecardDashboard.jsx",
+                            lineNumber: 68,
+                            columnNumber: 11
+                        }, ("TURBOPACK compile-time value", void 0))
+                    }, void 0, false, {
+                        fileName: "[project]/components/ScorecardDashboard.jsx",
+                        lineNumber: 67,
+                        columnNumber: 9
+                    }, ("TURBOPACK compile-time value", void 0)),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("path", {
+                        d: "M 20 100 A 80 80 0 0 1 180 100",
+                        fill: "none",
+                        stroke: "rgba(15, 23, 42, 0.1)",
+                        strokeWidth: "14",
+                        strokeLinecap: "round"
+                    }, void 0, false, {
+                        fileName: "[project]/components/ScorecardDashboard.jsx",
+                        lineNumber: 74,
+                        columnNumber: 9
+                    }, ("TURBOPACK compile-time value", void 0)),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("path", {
+                        d: "M 20 100 A 80 80 0 0 1 180 100",
+                        fill: "none",
+                        stroke: "url(#score-gradient)",
+                        strokeWidth: "14",
+                        strokeLinecap: "round",
+                        strokeDasharray: circumference,
+                        strokeDashoffset: dashOffset
+                    }, void 0, false, {
+                        fileName: "[project]/components/ScorecardDashboard.jsx",
+                        lineNumber: 81,
+                        columnNumber: 9
+                    }, ("TURBOPACK compile-time value", void 0)),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("line", {
+                        x1: "100",
+                        y1: "100",
+                        x2: 100 + Math.cos(angle * Math.PI / 180) * 62,
+                        y2: 100 + Math.sin(angle * Math.PI / 180) * 62,
+                        stroke: "#0f172a",
+                        strokeWidth: "3",
+                        strokeLinecap: "round"
+                    }, void 0, false, {
+                        fileName: "[project]/components/ScorecardDashboard.jsx",
+                        lineNumber: 90,
+                        columnNumber: 9
+                    }, ("TURBOPACK compile-time value", void 0)),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("circle", {
+                        cx: "100",
+                        cy: "100",
+                        r: "5",
+                        fill: "#0f172a"
+                    }, void 0, false, {
+                        fileName: "[project]/components/ScorecardDashboard.jsx",
+                        lineNumber: 99,
+                        columnNumber: 9
+                    }, ("TURBOPACK compile-time value", void 0))
+                ]
+            }, void 0, true, {
+                fileName: "[project]/components/ScorecardDashboard.jsx",
+                lineNumber: 66,
+                columnNumber: 7
+            }, ("TURBOPACK compile-time value", void 0)),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+                className: "score-gauge__value",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
+                        className: "score-gauge__grade",
+                        children: grade
+                    }, void 0, false, {
+                        fileName: "[project]/components/ScorecardDashboard.jsx",
+                        lineNumber: 102,
+                        columnNumber: 9
+                    }, ("TURBOPACK compile-time value", void 0)),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
+                        className: "score-gauge__percent",
+                        children: [
+                            clamped.toFixed(0),
+                            "%"
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/components/ScorecardDashboard.jsx",
+                        lineNumber: 103,
+                        columnNumber: 9
+                    }, ("TURBOPACK compile-time value", void 0))
+                ]
+            }, void 0, true, {
+                fileName: "[project]/components/ScorecardDashboard.jsx",
+                lineNumber: 101,
+                columnNumber: 7
+            }, ("TURBOPACK compile-time value", void 0))
+        ]
+    }, void 0, true, {
+        fileName: "[project]/components/ScorecardDashboard.jsx",
+        lineNumber: 65,
+        columnNumber: 5
+    }, ("TURBOPACK compile-time value", void 0));
+};
 const getThresholdIndicator = (metric)=>{
     const latestValue = Number.isFinite(metric?.latest?.value) ? Number(metric.latest.value) : null;
     const threshold = Number.isFinite(metric?.panic?.threshold) ? Number(metric.panic.threshold) : null;
@@ -741,6 +1009,13 @@ function ScorecardDashboard({ initialData }) {
         return summary;
     }, [
         metrics
+    ]);
+    const overallPercent = (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react__$5b$external$5d$__$28$react$2c$__cjs$29$__["useMemo"])(()=>{
+        if (!metrics.length) return 0;
+        return statusSummary['on-track'] / metrics.length * 100;
+    }, [
+        metrics.length,
+        statusSummary
     ]);
     const handleCadenceChange = async (nextCadence)=>{
         if (nextCadence === cadence) return;
@@ -810,20 +1085,20 @@ function ScorecardDashboard({ initialData }) {
                     children: "No metrics available"
                 }, void 0, false, {
                     fileName: "[project]/components/ScorecardDashboard.jsx",
-                    lineNumber: 196,
+                    lineNumber: 264,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
                     children: "Verify that the worksheet contains the IT scorecard metrics."
                 }, void 0, false, {
                     fileName: "[project]/components/ScorecardDashboard.jsx",
-                    lineNumber: 197,
+                    lineNumber: 265,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/components/ScorecardDashboard.jsx",
-            lineNumber: 195,
+            lineNumber: 263,
             columnNumber: 7
         }, this);
     }
@@ -840,14 +1115,14 @@ function ScorecardDashboard({ initialData }) {
                                 children: "IT Scorecard Report"
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 206,
+                                lineNumber: 274,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h1", {
                                 children: "Operational Health Snapshot"
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 207,
+                                lineNumber: 275,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -855,13 +1130,13 @@ function ScorecardDashboard({ initialData }) {
                                 children: CADENCE_COPY[cadence]?.helper || 'Leadership-ready trend report'
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 208,
+                                lineNumber: 276,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                        lineNumber: 205,
+                        lineNumber: 273,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -873,14 +1148,14 @@ function ScorecardDashboard({ initialData }) {
                                         children: "Last refreshed"
                                     }, void 0, false, {
                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                        lineNumber: 214,
+                                        lineNumber: 282,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("strong", {
                                         children: formatTimestamp(generatedAt)
                                     }, void 0, false, {
                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                        lineNumber: 215,
+                                        lineNumber: 283,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
@@ -888,13 +1163,13 @@ function ScorecardDashboard({ initialData }) {
                                         children: timeAgoLabel(generatedAt)
                                     }, void 0, false, {
                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                        lineNumber: 216,
+                                        lineNumber: 284,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 213,
+                                lineNumber: 281,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -903,14 +1178,14 @@ function ScorecardDashboard({ initialData }) {
                                         children: "Data last updated"
                                     }, void 0, false, {
                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                        lineNumber: 219,
+                                        lineNumber: 287,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("strong", {
                                         children: formatTimestamp(lastUpdatedAt || generatedAt)
                                     }, void 0, false, {
                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                        lineNumber: 220,
+                                        lineNumber: 288,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
@@ -918,13 +1193,13 @@ function ScorecardDashboard({ initialData }) {
                                         children: timeAgoLabel(lastUpdatedAt || generatedAt)
                                     }, void 0, false, {
                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                        lineNumber: 221,
+                                        lineNumber: 289,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 218,
+                                lineNumber: 286,
                                 columnNumber: 11
                             }, this),
                             cacheInfo?.status && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("span", {
@@ -936,19 +1211,19 @@ function ScorecardDashboard({ initialData }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 224,
+                                lineNumber: 292,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                        lineNumber: 212,
+                        lineNumber: 280,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                lineNumber: 204,
+                lineNumber: 272,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("section", {
@@ -962,14 +1237,14 @@ function ScorecardDashboard({ initialData }) {
                                 children: "Cadence"
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 234,
+                                lineNumber: 302,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
                                 children: CADENCE_COPY[cadence]?.label || cadence
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 235,
+                                lineNumber: 303,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -977,13 +1252,13 @@ function ScorecardDashboard({ initialData }) {
                                 children: payload?.sheetName
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 236,
+                                lineNumber: 304,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                        lineNumber: 233,
+                        lineNumber: 301,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -994,14 +1269,14 @@ function ScorecardDashboard({ initialData }) {
                                 children: "On track"
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 239,
+                                lineNumber: 307,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
                                 children: statusSummary['on-track']
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 240,
+                                lineNumber: 308,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -1009,13 +1284,13 @@ function ScorecardDashboard({ initialData }) {
                                 children: "Healthy metrics"
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 241,
+                                lineNumber: 309,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                        lineNumber: 238,
+                        lineNumber: 306,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -1026,14 +1301,14 @@ function ScorecardDashboard({ initialData }) {
                                 children: "At risk"
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 244,
+                                lineNumber: 312,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
                                 children: statusSummary['at-risk']
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 245,
+                                lineNumber: 313,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -1041,13 +1316,13 @@ function ScorecardDashboard({ initialData }) {
                                 children: "Needs attention"
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 246,
+                                lineNumber: 314,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                        lineNumber: 243,
+                        lineNumber: 311,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -1058,14 +1333,14 @@ function ScorecardDashboard({ initialData }) {
                                 children: "Total metrics"
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 249,
+                                lineNumber: 317,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("h2", {
                                 children: metrics.length
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 250,
+                                lineNumber: 318,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -1073,19 +1348,19 @@ function ScorecardDashboard({ initialData }) {
                                 children: "Across 4 categories"
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 251,
+                                lineNumber: 319,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                        lineNumber: 248,
+                        lineNumber: 316,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                lineNumber: 232,
+                lineNumber: 300,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("section", {
@@ -1098,7 +1373,7 @@ function ScorecardDashboard({ initialData }) {
                                 children: "Cadence"
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 257,
+                                lineNumber: 325,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -1111,18 +1386,55 @@ function ScorecardDashboard({ initialData }) {
                                         children: CADENCE_COPY[key].label
                                     }, key, false, {
                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                        lineNumber: 260,
+                                        lineNumber: 328,
                                         columnNumber: 15
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 258,
+                                lineNumber: 326,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                        lineNumber: 256,
+                        lineNumber: 324,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
+                        className: "score-summary",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
+                                className: "score-summary__label",
+                                children: "Overall Score"
+                            }, void 0, false, {
+                                fileName: "[project]/components/ScorecardDashboard.jsx",
+                                lineNumber: 341,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(ScoreGauge, {
+                                percent: overallPercent
+                            }, void 0, false, {
+                                fileName: "[project]/components/ScorecardDashboard.jsx",
+                                lineNumber: 342,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
+                                className: "score-summary__detail",
+                                children: [
+                                    statusSummary['on-track'],
+                                    " on track of ",
+                                    metrics.length,
+                                    " total"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/components/ScorecardDashboard.jsx",
+                                lineNumber: 343,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/components/ScorecardDashboard.jsx",
+                        lineNumber: 340,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -1136,7 +1448,7 @@ function ScorecardDashboard({ initialData }) {
                                 children: isRefreshing ? 'Refreshing…' : 'Refresh data'
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 273,
+                                lineNumber: 348,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("button", {
@@ -1146,13 +1458,13 @@ function ScorecardDashboard({ initialData }) {
                                 children: "Export PDF"
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 276,
+                                lineNumber: 351,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                        lineNumber: 272,
+                        lineNumber: 347,
                         columnNumber: 9
                     }, this),
                     refreshError && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -1160,13 +1472,13 @@ function ScorecardDashboard({ initialData }) {
                         children: refreshError
                     }, void 0, false, {
                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                        lineNumber: 280,
+                        lineNumber: 355,
                         columnNumber: 26
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                lineNumber: 255,
+                lineNumber: 323,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("section", {
@@ -1176,12 +1488,12 @@ function ScorecardDashboard({ initialData }) {
                     onSuccess: handleUploadSuccess
                 }, void 0, false, {
                     fileName: "[project]/components/ScorecardDashboard.jsx",
-                    lineNumber: 284,
+                    lineNumber: 359,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                lineNumber: 283,
+                lineNumber: 358,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("section", {
@@ -1194,7 +1506,7 @@ function ScorecardDashboard({ initialData }) {
                                 children: "Executive Summary"
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 289,
+                                lineNumber: 364,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -1202,13 +1514,13 @@ function ScorecardDashboard({ initialData }) {
                                 children: "Quick glance view of every metric."
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 290,
+                                lineNumber: 365,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                        lineNumber: 288,
+                        lineNumber: 363,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -1222,39 +1534,39 @@ function ScorecardDashboard({ initialData }) {
                                                 children: "Metric"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                lineNumber: 296,
+                                                lineNumber: 371,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("th", {
                                                 children: "Panic"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                lineNumber: 297,
+                                                lineNumber: 372,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("th", {
                                                 children: "Latest"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                lineNumber: 298,
+                                                lineNumber: 373,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("th", {
                                                 children: "Trend"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                lineNumber: 299,
+                                                lineNumber: 374,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                        lineNumber: 295,
+                                        lineNumber: 370,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/ScorecardDashboard.jsx",
-                                    lineNumber: 294,
+                                    lineNumber: 369,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("tbody", {
@@ -1266,12 +1578,12 @@ function ScorecardDashboard({ initialData }) {
                                                     children: category
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                    lineNumber: 306,
+                                                    lineNumber: 381,
                                                     columnNumber: 21
                                                 }, this)
                                             }, `summary-${category}-header`, false, {
                                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                lineNumber: 305,
+                                                lineNumber: 380,
                                                 columnNumber: 19
                                             }, this),
                                             ...categoryMetrics.map((metric)=>{
@@ -1283,14 +1595,14 @@ function ScorecardDashboard({ initialData }) {
                                                             children: metric.name
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                            lineNumber: 315,
+                                                            lineNumber: 390,
                                                             columnNumber: 25
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("td", {
                                                             children: panicLabel
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                            lineNumber: 316,
+                                                            lineNumber: 391,
                                                             columnNumber: 25
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("td", {
@@ -1299,7 +1611,7 @@ function ScorecardDashboard({ initialData }) {
                                                             })
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                            lineNumber: 317,
+                                                            lineNumber: 392,
                                                             columnNumber: 25
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("td", {
@@ -1309,42 +1621,42 @@ function ScorecardDashboard({ initialData }) {
                                                                 children: trend === 'up' ? '▲' : trend === 'down' ? '▼' : '■'
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                                lineNumber: 319,
+                                                                lineNumber: 394,
                                                                 columnNumber: 27
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                            lineNumber: 318,
+                                                            lineNumber: 393,
                                                             columnNumber: 25
                                                         }, this)
                                                     ]
                                                 }, `summary-${metric.id}`, true, {
                                                     fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                    lineNumber: 314,
+                                                    lineNumber: 389,
                                                     columnNumber: 23
                                                 }, this);
                                             })
                                         ])
                                 }, void 0, false, {
                                     fileName: "[project]/components/ScorecardDashboard.jsx",
-                                    lineNumber: 302,
+                                    lineNumber: 377,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/ScorecardDashboard.jsx",
-                            lineNumber: 293,
+                            lineNumber: 368,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                        lineNumber: 292,
+                        lineNumber: 367,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                lineNumber: 287,
+                lineNumber: 362,
                 columnNumber: 7
             }, this),
             metricsByCategory.map(({ category, metrics: categoryMetrics }, categoryIndex)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("section", {
@@ -1357,7 +1669,7 @@ function ScorecardDashboard({ initialData }) {
                                     children: category
                                 }, void 0, false, {
                                     fileName: "[project]/components/ScorecardDashboard.jsx",
-                                    lineNumber: 336,
+                                    lineNumber: 411,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -1368,13 +1680,13 @@ function ScorecardDashboard({ initialData }) {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/ScorecardDashboard.jsx",
-                                    lineNumber: 337,
+                                    lineNumber: 412,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/ScorecardDashboard.jsx",
-                            lineNumber: 335,
+                            lineNumber: 410,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -1388,23 +1700,23 @@ function ScorecardDashboard({ initialData }) {
                                         index: index + categoryIndex * 4
                                     }, void 0, false, {
                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                        lineNumber: 347,
+                                        lineNumber: 422,
                                         columnNumber: 17
                                     }, this)
                                 }, metric.id, false, {
                                     fileName: "[project]/components/ScorecardDashboard.jsx",
-                                    lineNumber: 341,
+                                    lineNumber: 416,
                                     columnNumber: 15
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/components/ScorecardDashboard.jsx",
-                            lineNumber: 339,
+                            lineNumber: 414,
                             columnNumber: 11
                         }, this)
                     ]
                 }, category, true, {
                     fileName: "[project]/components/ScorecardDashboard.jsx",
-                    lineNumber: 334,
+                    lineNumber: 409,
                     columnNumber: 9
                 }, this)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("section", {
@@ -1419,7 +1731,7 @@ function ScorecardDashboard({ initialData }) {
                                         children: "Trend Focus"
                                     }, void 0, false, {
                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                        lineNumber: 357,
+                                        lineNumber: 432,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -1427,13 +1739,13 @@ function ScorecardDashboard({ initialData }) {
                                         children: "Latest view for the selected metric."
                                     }, void 0, false, {
                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                        lineNumber: 358,
+                                        lineNumber: 433,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 356,
+                                lineNumber: 431,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("select", {
@@ -1448,18 +1760,18 @@ function ScorecardDashboard({ initialData }) {
                                         ]
                                     }, metric.id, true, {
                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                        lineNumber: 362,
+                                        lineNumber: 437,
                                         columnNumber: 15
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 360,
+                                lineNumber: 435,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                        lineNumber: 355,
+                        lineNumber: 430,
                         columnNumber: 9
                     }, this),
                     selectedMetric ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["Fragment"], {
@@ -1474,7 +1786,7 @@ function ScorecardDashboard({ initialData }) {
                                                 children: selectedMetric.name
                                             }, void 0, false, {
                                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                lineNumber: 372,
+                                                lineNumber: 447,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -1482,7 +1794,7 @@ function ScorecardDashboard({ initialData }) {
                                                 children: selectedMetric.description || 'No description provided.'
                                             }, void 0, false, {
                                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                lineNumber: 373,
+                                                lineNumber: 448,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("p", {
@@ -1490,26 +1802,26 @@ function ScorecardDashboard({ initialData }) {
                                                 children: selectedMetric.panic?.text || 'Panic threshold not set.'
                                             }, void 0, false, {
                                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                lineNumber: 374,
+                                                lineNumber: 449,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                        lineNumber: 371,
+                                        lineNumber: 446,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$MetricChart$2e$jsx__$5b$ssr$5d$__$28$ecmascript$29$__["default"], {
                                         metric: selectedMetric
                                     }, void 0, false, {
                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                        lineNumber: 376,
+                                        lineNumber: 451,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 370,
+                                lineNumber: 445,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("div", {
@@ -1523,25 +1835,25 @@ function ScorecardDashboard({ initialData }) {
                                                         children: cadence === 'monthly' ? 'Month' : 'Week'
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                        lineNumber: 382,
+                                                        lineNumber: 457,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("th", {
                                                         children: "Value"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                        lineNumber: 383,
+                                                        lineNumber: 458,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                lineNumber: 381,
+                                                lineNumber: 456,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/components/ScorecardDashboard.jsx",
-                                            lineNumber: 380,
+                                            lineNumber: 455,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("tbody", {
@@ -1551,7 +1863,7 @@ function ScorecardDashboard({ initialData }) {
                                                             children: point.period
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                            lineNumber: 389,
+                                                            lineNumber: 464,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$externals$5d2f$react$2f$jsx$2d$dev$2d$runtime__$5b$external$5d$__$28$react$2f$jsx$2d$dev$2d$runtime$2c$__cjs$29$__["jsxDEV"])("td", {
@@ -1560,29 +1872,29 @@ function ScorecardDashboard({ initialData }) {
                                                             })
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                            lineNumber: 390,
+                                                            lineNumber: 465,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, `${selectedMetric.id}-${point.period}`, true, {
                                                     fileName: "[project]/components/ScorecardDashboard.jsx",
-                                                    lineNumber: 388,
+                                                    lineNumber: 463,
                                                     columnNumber: 21
                                                 }, this))
                                         }, void 0, false, {
                                             fileName: "[project]/components/ScorecardDashboard.jsx",
-                                            lineNumber: 386,
+                                            lineNumber: 461,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/ScorecardDashboard.jsx",
-                                    lineNumber: 379,
+                                    lineNumber: 454,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                                lineNumber: 378,
+                                lineNumber: 453,
                                 columnNumber: 13
                             }, this)
                         ]
@@ -1591,19 +1903,19 @@ function ScorecardDashboard({ initialData }) {
                         children: "No metric selected."
                     }, void 0, false, {
                         fileName: "[project]/components/ScorecardDashboard.jsx",
-                        lineNumber: 398,
+                        lineNumber: 473,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/ScorecardDashboard.jsx",
-                lineNumber: 354,
+                lineNumber: 429,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/ScorecardDashboard.jsx",
-        lineNumber: 203,
+        lineNumber: 271,
         columnNumber: 5
     }, this);
 }
@@ -1688,10 +2000,18 @@ const parsePanicCell = (cellValue)=>{
     const text = String(cellValue).trim();
     const cleaned = text.replace(/^p:\s*/i, '').trim();
     const lower = cleaned.toLowerCase();
-    const comparator = /more\s+than/.test(lower) ? 'more' : /less\s+than/.test(lower) ? 'less' : null;
+    const comparator = /more\s+than|greater\s+than|above/.test(lower) ? 'more' : /less\s+than|below/.test(lower) ? 'less' : null;
     const isPercent = /%/.test(cleaned);
     const rawThreshold = sanitizeNumber(cleaned);
     const threshold = rawThreshold === null ? null : isPercent ? rawThreshold / 100 : rawThreshold;
+    if (comparator === null && threshold === 0) {
+        return {
+            text,
+            threshold,
+            comparator: 'more',
+            isPercent
+        };
+    }
     return {
         text,
         threshold,
@@ -1788,6 +2108,18 @@ const formatPeriodLabel = (value, cadence)=>{
     }
     return text;
 };
+const parsePeriodSortKey = (value)=>{
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+        return value.getTime();
+    }
+    if (typeof value === 'number') {
+        const parsed = __TURBOPACK__imported__module__$5b$externals$5d2f$xlsx__$5b$external$5d$__$28$xlsx$2c$__cjs$29$__["SSF"].parse_date_code(value);
+        if (parsed?.y && parsed?.m && parsed?.d) {
+            return Date.UTC(parsed.y, parsed.m - 1, parsed.d);
+        }
+    }
+    return null;
+};
 const findHeaderIndex = (rows)=>rows.findIndex((row)=>{
         const metricLabel = String(row?.[1] || '').trim().toLowerCase();
         const panicLabel = String(row?.[3] || '').trim().toLowerCase();
@@ -1839,11 +2171,23 @@ const extractMetricRows = (rows, cadence)=>{
     const headerRow = rows[headerIndex];
     const cadenceConfig = CADENCE_CONFIG[cadence] || CADENCE_CONFIG.weekly;
     const { valueStart, valueEnd } = buildColumnWindow(headerRow, rows, headerIndex, cadenceConfig);
-    const periodLabels = headerRow.slice(valueStart, valueEnd + 1).map((label, idx)=>{
+    const columns = [];
+    for(let colIndex = valueStart; colIndex <= valueEnd; colIndex += 1){
+        const label = headerRow[colIndex];
         const formatted = formatPeriodLabel(label, cadence);
-        if (formatted) return formatted;
-        return cadence === 'monthly' ? `Month ${idx + 1}` : `Week ${idx + 1}`;
-    });
+        columns.push({
+            colIndex,
+            label: formatted || (cadence === 'monthly' ? `Month ${colIndex - valueStart + 1}` : `Week ${colIndex - valueStart + 1}`),
+            sortKey: cadence === 'weekly' ? parsePeriodSortKey(label) : null
+        });
+    }
+    let orderedColumns = columns;
+    if (cadence === 'weekly' && columns.length > 1 && columns.every((col)=>col.sortKey !== null)) {
+        orderedColumns = [
+            ...columns
+        ].sort((a, b)=>a.sortKey - b.sortKey);
+    }
+    const periodLabels = orderedColumns.map((col)=>col.label);
     const metrics = [];
     let lastCategory = '';
     for(let rowIndex = headerIndex + 1; rowIndex < rows.length; rowIndex += 1){
@@ -1860,10 +2204,10 @@ const extractMetricRows = (rows, cadence)=>{
         const category = lastCategory || 'General';
         const description = row[2] ? String(row[2]).trim() : '';
         const panic = parsePanicCell(row[3]);
-        const series = periodLabels.map((label, periodIdx)=>{
-            const rawValue = row[valueStart + periodIdx];
+        const series = orderedColumns.map((col)=>{
+            const rawValue = row[col.colIndex];
             return {
-                period: label,
+                period: col.label,
                 raw: rawValue === undefined || rawValue === null ? null : String(rawValue),
                 value: sanitizeNumber(rawValue)
             };

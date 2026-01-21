@@ -43,6 +43,69 @@ const CADENCE_COPY = {
   },
 };
 
+const getLetterGrade = (percent) => {
+  if (percent >= 90) return 'A';
+  if (percent >= 80) return 'B';
+  if (percent >= 70) return 'C';
+  if (percent >= 60) return 'D';
+  return 'F';
+};
+
+const ScoreGauge = ({ percent }) => {
+  const clamped = Math.max(0, Math.min(100, percent));
+  const grade = getLetterGrade(clamped);
+  const radius = 80;
+  const stroke = 14;
+  const normalizedRadius = radius - stroke / 2;
+  const circumference = normalizedRadius * Math.PI;
+  const dashOffset = circumference * (1 - clamped / 100);
+  const angle = -90 + (clamped / 100) * 180;
+
+  return (
+    <div className="score-gauge">
+      <svg viewBox="0 0 200 120" role="img" aria-label={`Overall score ${clamped}%`}>
+        <defs>
+          <linearGradient id="score-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#dc2626" />
+            <stop offset="50%" stopColor="#f59e0b" />
+            <stop offset="100%" stopColor="#16a34a" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M 20 100 A 80 80 0 0 1 180 100"
+          fill="none"
+          stroke="rgba(15, 23, 42, 0.1)"
+          strokeWidth="14"
+          strokeLinecap="round"
+        />
+        <path
+          d="M 20 100 A 80 80 0 0 1 180 100"
+          fill="none"
+          stroke="url(#score-gradient)"
+          strokeWidth="14"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={dashOffset}
+        />
+        <line
+          x1="100"
+          y1="100"
+          x2={100 + Math.cos((angle * Math.PI) / 180) * 62}
+          y2={100 + Math.sin((angle * Math.PI) / 180) * 62}
+          stroke="#0f172a"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <circle cx="100" cy="100" r="5" fill="#0f172a" />
+      </svg>
+      <div className="score-gauge__value">
+        <span className="score-gauge__grade">{grade}</span>
+        <span className="score-gauge__percent">{clamped.toFixed(0)}%</span>
+      </div>
+    </div>
+  );
+};
+
 const getThresholdIndicator = (metric) => {
   const latestValue = Number.isFinite(metric?.latest?.value) ? Number(metric.latest.value) : null;
   const threshold = Number.isFinite(metric?.panic?.threshold) ? Number(metric.panic.threshold) : null;
@@ -96,6 +159,11 @@ export default function ScorecardDashboard({ initialData }) {
     });
     return summary;
   }, [metrics]);
+
+  const overallPercent = useMemo(() => {
+    if (!metrics.length) return 0;
+    return (statusSummary['on-track'] / metrics.length) * 100;
+  }, [metrics.length, statusSummary]);
 
   const handleCadenceChange = async (nextCadence) => {
     if (nextCadence === cadence) return;
@@ -268,6 +336,13 @@ export default function ScorecardDashboard({ initialData }) {
               </button>
             ))}
           </div>
+        </div>
+        <div className="score-summary">
+          <p className="score-summary__label">Overall Score</p>
+          <ScoreGauge percent={overallPercent} />
+          <p className="score-summary__detail">
+            {statusSummary['on-track']} on track of {metrics.length} total
+          </p>
         </div>
         <div className="control-actions">
           <button type="button" className="primary-button" onClick={handleRefresh} disabled={isRefreshing}>

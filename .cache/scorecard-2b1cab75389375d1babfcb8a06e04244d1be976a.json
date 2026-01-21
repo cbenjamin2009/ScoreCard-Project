@@ -2,13 +2,13 @@
   "meta": {
     "workbookPath": "/home/master/Development/ScoreCard Project/assets/IT Scorecard 2026.xlsx",
     "sheetName": "EOS 2026",
-    "sourceMtimeMs": 1769020731275.4556,
-    "cachedAt": "2026-01-21T19:16:58.679Z"
+    "sourceMtimeMs": 1768953658000,
+    "cachedAt": "2026-01-21T21:30:43.511Z"
   },
   "payload": {
     "sheetName": "EOS 2026",
     "source": "/home/master/Development/ScoreCard Project/assets/IT Scorecard 2026.xlsx",
-    "generatedAt": "2026-01-21T19:16:58.679Z",
+    "generatedAt": "2026-01-21T21:30:43.510Z",
     "cadence": "weekly",
     "cadenceLabel": "Weekly",
     "periods": [
@@ -493,7 +493,7 @@
         "panic": {
           "text": "P: Greater than 3",
           "threshold": 3,
-          "comparator": null,
+          "comparator": "more",
           "isPercent": false
         },
         "series": [
@@ -519,7 +519,7 @@
           "value": 0,
           "display": "0"
         },
-        "status": "unknown"
+        "status": "on-track"
       },
       {
         "id": "security-risk-critical-systems-fully-patched",

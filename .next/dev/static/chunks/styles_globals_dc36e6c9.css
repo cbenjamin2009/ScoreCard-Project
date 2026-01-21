@@ -238,6 +238,63 @@ section h2 {
   display: flex;
 }
 
+.score-summary {
+  background: #0f766e14;
+  border: 1px solid #0f766e33;
+  border-radius: 1.2rem;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+  min-width: 180px;
+  padding: .6rem 1rem;
+  display: flex;
+}
+
+.score-summary__label {
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--accent-strong);
+  margin: 0;
+  font-size: .75rem;
+}
+
+.score-summary__detail {
+  color: var(--text-muted);
+  margin: 0;
+  font-size: .8rem;
+}
+
+.score-gauge {
+  flex-direction: column;
+  align-items: center;
+  gap: .2rem;
+  display: flex;
+}
+
+.score-gauge svg {
+  width: 160px;
+  height: auto;
+}
+
+.score-gauge__value {
+  align-items: baseline;
+  gap: .4rem;
+  display: flex;
+}
+
+.score-gauge__grade {
+  font-size: 1.8rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--accent-strong);
+}
+
+.score-gauge__percent {
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
 .segmented-control {
   background: #0f172a0a;
   border-radius: 999px;
@@ -430,8 +487,44 @@ section h2 {
 }
 
 .metric-card__sparkline-chart {
+  flex-direction: column;
+  gap: .2rem;
   width: 100%;
+  display: flex;
+}
+
+.metric-card__sparkline-row {
+  align-items: center;
+  gap: .35rem;
+  display: flex;
+}
+
+.metric-card__sparkline-chart svg {
+  width: calc(100% - 12px);
   height: auto;
+  margin: 0 6px;
+  overflow: visible;
+}
+
+.metric-card__sparkline-axis {
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text-muted);
+  justify-content: space-between;
+  font-size: .65rem;
+  display: flex;
+}
+
+.metric-card__sparkline-axis--y {
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  height: 44px;
+  margin-right: .4rem;
+}
+
+.metric-card__sparkline-axis--x {
+  margin-left: 0;
 }
 
 .metric-card .label {
@@ -621,6 +714,10 @@ th, td {
     width: 100%;
   }
 
+  .score-summary {
+    align-items: flex-start;
+  }
+
   .metric-card__values {
     flex-direction: column;
   }
@@ -640,7 +737,14 @@ th, td {
     box-shadow: none;
   }
 
-  .dashboard__controls, .dashboard__upload, .metric-detail, .metric-card__description, .metric-card__category {
+  .dashboard__controls {
+    justify-content: flex-start;
+    gap: 1rem;
+    padding: .8rem 1rem;
+    display: flex;
+  }
+
+  .dashboard__upload, .dashboard__controls .control-group, .dashboard__controls .control-actions, .dashboard__controls .error-text, .metric-detail, .metric-card__description, .metric-card__category {
     display: none;
   }
 
