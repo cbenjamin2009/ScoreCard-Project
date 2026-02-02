@@ -1,4 +1,4 @@
-# Rush Scorecard Dashboard
+# 2026 Scorecard Dashboard
 
 Next.js application that reads weekly and monthly scorecard worksheets from an Excel workbook and renders a leadership-ready dashboard with cards, tables, charts, and a PDF export.
 
