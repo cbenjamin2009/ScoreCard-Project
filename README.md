@@ -92,7 +92,6 @@ Note: On Ubuntu, Cypress requires system libraries. If it fails to launch, insta
    ```
 3. Open the app in a browser:
    - `http://<docker-host>:3005`
-   - or `http://ITScoreCard.therushcompanies.com:3005` once DNS is in place.
 
 ### Updating the deployment
 ```bash
