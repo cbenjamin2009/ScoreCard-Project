@@ -43,6 +43,16 @@ const CADENCE_COPY = {
   },
 };
 
+const parseCadenceCookie = (cookieString) => {
+  if (!cookieString) return null;
+  const entries = cookieString.split(';').map((entry) => entry.trim());
+  const match = entries.find((entry) => entry.startsWith('scorecard-cadence='));
+  if (!match) return null;
+  const value = match.split('=')[1];
+  if (value === 'weekly' || value === 'monthly') return value;
+  return null;
+};
+
 const getLetterGrade = (percent) => {
   if (percent >= 90) return 'A';
   if (percent >= 80) return 'B';
@@ -123,11 +133,20 @@ const getThresholdIndicator = (metric) => {
 export default function ScorecardDashboard({ initialData }) {
   const [payload, setPayload] = useState(initialData);
   const [cadence, setCadence] = useState(initialData?.cadence || 'weekly');
+  const [divisionName, setDivisionName] = useState('');
   const [selectedMetricId, setSelectedMetricId] = useState(
     initialData?.metrics?.[0]?.id || null,
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [refreshError, setRefreshError] = useState('');
+  const [uploadMetaToken, setUploadMetaToken] = useState(0);
+  const [showCadenceToast, setShowCadenceToast] = useState(false);
+
+  const storedCadence = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    return parseCadenceCookie(window.document?.cookie || '');
+  }, []);
 
   const metrics = useMemo(
     () => (Array.isArray(payload?.metrics) ? payload.metrics : []),
@@ -136,6 +155,7 @@ export default function ScorecardDashboard({ initialData }) {
   const generatedAt = payload?.generatedAt;
   const lastUpdatedAt = payload?.lastUpdatedAt;
   const cacheInfo = payload?.cacheInfo;
+  const availableCadences = payload?.availableCadences;
 
   const categories = useMemo(() => getMetricCategories(metrics), [metrics]);
 
@@ -165,6 +185,22 @@ export default function ScorecardDashboard({ initialData }) {
     return (statusSummary['on-track'] / metrics.length) * 100;
   }, [metrics.length, statusSummary]);
 
+  const hasPanicMetrics = useMemo(
+    () => metrics.some((metric) => metric?.panic?.threshold !== null && metric?.panic?.comparator),
+    [metrics],
+  );
+
+  const cadenceToast = useMemo(() => {
+    if (!payload?.cadenceFallback || !availableCadences) return '';
+    if (payload.cadence === 'monthly' && !availableCadences.monthly && availableCadences.weekly) {
+      return 'Monthly sheet not found. Showing Weekly data.';
+    }
+    if (payload.cadence === 'weekly' && !availableCadences.weekly && availableCadences.monthly) {
+      return 'Weekly sheet not found. Showing Monthly data.';
+    }
+    return 'Requested cadence sheet not found. Showing available data.';
+  }, [availableCadences, payload]);
+
   const handleCadenceChange = async (nextCadence) => {
     if (nextCadence === cadence) return;
     setIsRefreshing(true);
@@ -177,6 +213,9 @@ export default function ScorecardDashboard({ initialData }) {
       }
       setPayload(result);
       setCadence(nextCadence);
+      if (typeof window !== 'undefined') {
+        document.cookie = `scorecard-cadence=${nextCadence}; path=/; max-age=31536000; samesite=lax`;
+      }
       setSelectedMetricId(result.metrics?.[0]?.id || null);
     } catch (error) {
       setRefreshError(error.message);
@@ -208,13 +247,69 @@ export default function ScorecardDashboard({ initialData }) {
     window.print();
   };
 
+  const handleReset = async () => {
+    setIsResetting(true);
+    setRefreshError('');
+    try {
+      const response = await fetch(`/api/reset?cadence=${cadence}`, { method: 'POST' });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || 'Unable to reset the workbook');
+      }
+      setPayload(result.data);
+      setSelectedMetricId(result.data?.metrics?.[0]?.id || null);
+      setUploadMetaToken((token) => token + 1);
+    } catch (error) {
+      setRefreshError(error.message);
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   const handleUploadSuccess = (data) => {
     if (!data) return;
     setPayload(data);
     setCadence(data.cadence || cadence);
+    if (typeof window !== 'undefined') {
+      document.cookie = `scorecard-cadence=${data.cadence || cadence}; path=/; max-age=31536000; samesite=lax`;
+    }
     setSelectedMetricId(data.metrics?.[0]?.id || null);
     setRefreshError('');
   };
+
+  const handleDivisionChange = (event) => {
+    const nextValue = event.target.value;
+    setDivisionName(nextValue);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('scorecard-division', nextValue);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!storedCadence) return;
+    if (storedCadence === initialData?.cadence) return;
+    if (initialData?.cadenceFallback) return;
+    handleCadenceChange(storedCadence);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!cadenceToast) return;
+    setShowCadenceToast(true);
+    const timer = window.setTimeout(() => {
+      setShowCadenceToast(false);
+    }, 5000);
+    return () => window.clearTimeout(timer);
+  }, [cadenceToast]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const storedDivision = window.localStorage.getItem('scorecard-division') || '';
+    if (storedDivision) {
+      setDivisionName(storedDivision);
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -267,12 +362,32 @@ export default function ScorecardDashboard({ initialData }) {
     );
   }
 
+  const cadenceLabel = CADENCE_COPY[cadence]?.label || cadence;
+  const reportTitle = `${cadenceLabel} ScoreCard`;
+
   return (
     <div className="dashboard">
+      {showCadenceToast && cadenceToast && (
+        <div className="toast toast--info" role="status">
+          {cadenceToast}
+        </div>
+      )}
       <header className="dashboard__header">
         <div>
-          <p className="eyebrow">IT Scorecard Report</p>
-          <h1>Operational Health Snapshot</h1>
+          <img className="dashboard__logo" src="/header_am.png" alt="Rush Scorecard" />
+          <p className="eyebrow">Rush Scorecard Report</p>
+          <h1>{reportTitle}</h1>
+          <label className="muted" htmlFor="divisionName">
+            Division name
+          </label>
+          <input
+            id="divisionName"
+            className="text-input"
+            type="text"
+            value={divisionName}
+            onChange={handleDivisionChange}
+            placeholder="Enter division or team name"
+          />
           <p className="muted">
             {CADENCE_COPY[cadence]?.helper || 'Leadership-ready trend report'}
           </p>
@@ -298,11 +413,15 @@ export default function ScorecardDashboard({ initialData }) {
       </header>
 
       <section className="dashboard__summary">
-        <div className="summary-card">
-          <p className="summary-label">Cadence</p>
-          <h2>{CADENCE_COPY[cadence]?.label || cadence}</h2>
-          <p className="summary-foot">{payload?.sheetName}</p>
-        </div>
+        {hasPanicMetrics && (
+          <div className="summary-card summary-card--score">
+            <p className="summary-label">Overall score</p>
+            <ScoreGauge percent={overallPercent} />
+            <p className="summary-foot">
+              {statusSummary['on-track']} on track of {metrics.length}
+            </p>
+          </div>
+        )}
         <div className="summary-card">
           <p className="summary-label">On track</p>
           <h2>{statusSummary['on-track']}</h2>
@@ -320,43 +439,50 @@ export default function ScorecardDashboard({ initialData }) {
         </div>
       </section>
 
-      <section className="dashboard__controls">
-        <div className="control-group">
-          <label>Cadence</label>
-          <div className="segmented-control">
-            {Object.keys(CADENCE_COPY).map((key) => (
-              <button
-                key={key}
-                type="button"
-                className={`segment ${cadence === key ? 'segment--active' : ''}`}
-                onClick={() => handleCadenceChange(key)}
-                disabled={isRefreshing}
-              >
-                {CADENCE_COPY[key].label}
-              </button>
-            ))}
+      <section className="dashboard__control-panel">
+        <div className="dashboard__controls">
+          <div className="control-group">
+            <label>Cadence</label>
+            <div className="segmented-control">
+              {Object.keys(CADENCE_COPY).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`segment ${cadence === key ? 'segment--active' : ''}`}
+                  onClick={() => handleCadenceChange(key)}
+                  disabled={isRefreshing}
+                >
+                  {CADENCE_COPY[key].label}
+                </button>
+              ))}
+            </div>
           </div>
+          <div className="control-actions">
+            <button
+              type="button"
+              className="primary-button"
+              onClick={handleRefresh}
+              disabled={isRefreshing || isResetting}
+            >
+              {isRefreshing ? 'Refreshing…' : 'Refresh data'}
+            </button>
+            <button type="button" className="ghost-button" onClick={handleExport}>
+              Export PDF
+            </button>
+            <button
+              type="button"
+              className="danger-button"
+              onClick={handleReset}
+              disabled={isRefreshing || isResetting}
+            >
+              {isResetting ? 'Resetting…' : 'Reset template'}
+            </button>
+          </div>
+          {refreshError && <p className="error-text">{refreshError}</p>}
         </div>
-        <div className="score-summary">
-          <p className="score-summary__label">Overall Score</p>
-          <ScoreGauge percent={overallPercent} />
-          <p className="score-summary__detail">
-            {statusSummary['on-track']} on track of {metrics.length} total
-          </p>
+        <div className="dashboard__upload">
+          <UploadPanel cadence={cadence} onSuccess={handleUploadSuccess} refreshToken={uploadMetaToken} />
         </div>
-        <div className="control-actions">
-          <button type="button" className="primary-button" onClick={handleRefresh} disabled={isRefreshing}>
-            {isRefreshing ? 'Refreshing…' : 'Refresh data'}
-          </button>
-          <button type="button" className="ghost-button" onClick={handleExport}>
-            Export PDF
-          </button>
-        </div>
-        {refreshError && <p className="error-text">{refreshError}</p>}
-      </section>
-
-      <section className="dashboard__upload">
-        <UploadPanel cadence={cadence} onSuccess={handleUploadSuccess} />
       </section>
 
       <section className="executive-summary">

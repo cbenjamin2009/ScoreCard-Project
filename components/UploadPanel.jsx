@@ -18,13 +18,13 @@ const formatTimestamp = (timestamp) => {
   }
 };
 
-export default function UploadPanel({ cadence = 'weekly', onSuccess }) {
+export default function UploadPanel({ cadence = 'weekly', onSuccess, refreshToken }) {
   const inputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState('');
   const [variant, setVariant] = useState('muted');
-  const [fileMeta, setFileMeta] = useState({ name: 'IT Scorecard 2026.xlsx', updatedAt: '' });
+  const [fileMeta, setFileMeta] = useState({ name: 'Scorecard Template.xlsx', updatedAt: '' });
 
   const loadFileMeta = async () => {
     try {
@@ -32,7 +32,7 @@ export default function UploadPanel({ cadence = 'weekly', onSuccess }) {
       if (!response.ok) return;
       const data = await response.json();
       setFileMeta({
-        name: data.name || 'IT Scorecard 2026.xlsx',
+        name: data.name || 'Scorecard Template.xlsx',
         updatedAt: data.updatedAt || '',
       });
     } catch {
@@ -42,7 +42,7 @@ export default function UploadPanel({ cadence = 'weekly', onSuccess }) {
 
   useEffect(() => {
     loadFileMeta();
-  }, []);
+  }, [refreshToken]);
 
   const resetState = () => {
     setIsDragging(false);

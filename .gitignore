@@ -1,5 +1,10 @@
 node_modules
+.next
+.cache
+cypress/videos
+cypress/screenshots
 assets/*.xlsx
+!assets/Scorecard Template.xlsx
 assets/*.pdf
 assets/*.png
 assets/*.jpg

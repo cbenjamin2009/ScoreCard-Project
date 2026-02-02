@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import formidable from 'formidable';
-import { getScorecardData, resolveWorkbookPath } from '@/lib/scorecard';
+import { getScorecardData } from '@/lib/scorecard';
+import { ensureSessionId, getSessionPaths, setSessionCookie, writeSessionMeta } from '@/lib/session';
 
 export const config = {
   api: {
@@ -50,20 +51,27 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'Please upload a valid .xlsx file.' });
     }
 
-    const destination = resolveWorkbookPath();
-    fs.mkdirSync(path.dirname(destination), { recursive: true });
-    await fs.promises.copyFile(uploaded.filepath, destination);
-    await fs.promises.chmod(destination, 0o644);
+    const { sessionId, isNew } = ensureSessionId(req.headers?.cookie);
+    const { dir, workbookPath } = getSessionPaths(sessionId);
+    fs.mkdirSync(dir, { recursive: true });
+    await fs.promises.copyFile(uploaded.filepath, workbookPath);
+    await fs.promises.chmod(workbookPath, 0o644);
 
     const cadence = Array.isArray(req.query?.cadence) ? req.query.cadence[0] : req.query?.cadence;
-    const payload = getScorecardData({ cadence });
+    const payload = getScorecardData({ cadence, workbookPath });
+    const updatedAt = new Date().toISOString();
+    const displayName = uploaded.originalFilename || path.basename(workbookPath);
+    writeSessionMeta(sessionId, { name: displayName, updatedAt });
+    if (isNew) {
+      setSessionCookie(res, sessionId);
+    }
 
     return res.status(200).json({
       message: 'Workbook uploaded successfully.',
       data: payload,
       file: {
-        name: path.basename(destination),
-        updatedAt: new Date().toISOString(),
+        name: displayName,
+        updatedAt,
       },
     });
   } catch (error) {

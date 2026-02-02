@@ -1,15 +1,17 @@
 {
-  "name": "scorecard-project",
+  "name": "rush-scorecard-project",
   "version": "1.0.0",
   "private": true,
-  "description": "Local Next.js app that surfaces Weekly EOS scorecard metrics from Excel.",
+  "description": "Next.js app that renders scorecard metrics from Excel for reusable dashboards.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext js,jsx",
     "test": "vitest run",
-    "cache:clear": "node scripts/clear-cache.js"
+    "cache:clear": "node scripts/clear-cache.js",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run"
   },
   "keywords": [
     "scorecard",
@@ -30,6 +32,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "cypress": "^13.17.0",
     "eslint": "^9.39.1",
     "eslint-config-next": "^16.0.3",
     "vitest": "^4.0.8"

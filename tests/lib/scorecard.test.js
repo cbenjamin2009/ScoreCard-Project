@@ -95,6 +95,26 @@ describe('getScorecardData', () => {
     expect(() => getScorecardData({ cadence: 'weekly' })).toThrow(/Worksheet "EOS 2026"/);
   });
 
+  it('handles missing description and panic columns', () => {
+    const filePath = createWorkbookFile({
+      rows: [
+        ['Category', 'Metric', 'Week 1', 'Week 2'],
+        ['Tickets', 'Tickets Opened', '45', '55'],
+      ],
+    });
+    filesToCleanup.push(filePath);
+    process.env.SOURCE_SPREADSHEET = filePath;
+    process.env.SCORECARD_WEEKLY_SHEET = WORKSHEET;
+
+    const result = getScorecardData({ cadence: 'weekly' });
+    expect(result.metrics).toHaveLength(1);
+    const metric = result.metrics[0];
+    expect(metric.description).toBe('');
+    expect(metric.panic?.text).toBe('');
+    expect(metric.status).toBe('unknown');
+    expect(metric.latest.raw).toBe('55');
+  });
+
   it('serves cached payload when workbook is unchanged', () => {
     const filePath = createWorkbookFile({
       rows: [
