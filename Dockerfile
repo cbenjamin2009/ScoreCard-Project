@@ -21,4 +21,4 @@ COPY --from=builder /app/.cache ./.cache
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["node", "server.js"] 
