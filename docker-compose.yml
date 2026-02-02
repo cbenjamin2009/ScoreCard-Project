@@ -8,8 +8,8 @@ services:
       NODE_ENV: production
       PORT: 3000
       SOURCE_SPREADSHEET: /app/assets/Scorecard Template.xlsx
-      SCORECARD_WEEKLY_SHEET: EOS 2026
-      SCORECARD_MONTHLY_SHEET: IT Monthly 2026
+      SCORECARD_WEEKLY_SHEET: Weekly
+      SCORECARD_MONTHLY_SHEET: Monthly
     volumes:
       - ./assets:/app/assets
       - ./.cache:/app/.cache
