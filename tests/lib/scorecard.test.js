@@ -18,6 +18,19 @@ const createWorkbookFile = ({ rows, sheetName = WORKSHEET }) => {
   return filePath;
 };
 
+const createWorkbookFileWithSheets = (sheets) => {
+  const workbook = XLSX.utils.book_new();
+  sheets.forEach(({ name, rows }) => {
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(workbook, worksheet, name);
+  });
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scorecard-'));
+  const filePath = path.join(tmpDir, 'scorecard.xlsx');
+  XLSX.writeFile(workbook, filePath);
+  return filePath;
+};
+
 let filesToCleanup = [];
 let tempDirs = [];
 
@@ -111,7 +124,7 @@ describe('getScorecardData', () => {
     const metric = result.metrics[0];
     expect(metric.description).toBe('');
     expect(metric.panic?.text).toBe('');
-    expect(metric.status).toBe('unknown');
+    expect(metric.status).toBe('on-track');
     expect(metric.latest.raw).toBe('55');
   });
 
@@ -173,5 +186,98 @@ describe('getScorecardData', () => {
     const second = getScorecardData({ cadence: 'weekly' });
     expect(second.metrics[0].latest.raw).toBe('55');
     expect(second.cacheInfo?.status).toBe('miss');
+  });
+
+  it('uses weekly cadence even when the weekly sheet lacks a keyword', () => {
+    const filePath = createWorkbookFileWithSheets([
+      {
+        name: WORKSHEET,
+        rows: [
+          ['Category', 'Metric', 'Description', 'Panic #', 'Week 1'],
+          ['Tickets', 'Opened', 'Desc', 'P: More than 50', '44'],
+        ],
+      },
+      {
+        name: 'Monthly',
+        rows: [
+          ['Category', 'Metric', 'Description', 'Panic #', 'Jan'],
+          ['Tickets', 'Opened', 'Desc', 'P: More than 50', '61'],
+        ],
+      },
+    ]);
+    filesToCleanup.push(filePath);
+    process.env.SOURCE_SPREADSHEET = filePath;
+
+    const result = getScorecardData({ cadence: 'weekly' });
+    expect(result.cadence).toBe('weekly');
+    expect(result.cadenceFallback).toBe(false);
+    expect(result.sheetName).toBe(WORKSHEET);
+    expect(result.metrics[0].latest.raw).toBe('44');
+  });
+
+  it('uses monthly cadence even when the monthly sheet lacks a keyword', () => {
+    const filePath = createWorkbookFileWithSheets([
+      {
+        name: 'Weekly',
+        rows: [
+          ['Category', 'Metric', 'Description', 'Panic #', 'Week 1'],
+          ['Tickets', 'Opened', 'Desc', 'P: More than 50', '41'],
+        ],
+      },
+      {
+        name: WORKSHEET,
+        rows: [
+          ['Category', 'Metric', 'Description', 'Panic #', 'Jan'],
+          ['Tickets', 'Opened', 'Desc', 'P: More than 50', '72'],
+        ],
+      },
+    ]);
+    filesToCleanup.push(filePath);
+    process.env.SOURCE_SPREADSHEET = filePath;
+
+    const result = getScorecardData({ cadence: 'monthly' });
+    expect(result.cadence).toBe('monthly');
+    expect(result.cadenceFallback).toBe(false);
+    expect(result.sheetName).toBe(WORKSHEET);
+    expect(result.metrics[0].latest.raw).toBe('72');
+  });
+
+  it('prefers the session workbook for weekly uploads with ambiguous sheet names', () => {
+    const sessionWorkbook = createWorkbookFileWithSheets([
+      {
+        name: WORKSHEET,
+        rows: [
+          ['Category', 'Metric', 'Description', 'Panic #', 'Week 1'],
+          ['Tickets', 'Opened', 'Desc', 'P: More than 50', '47'],
+        ],
+      },
+      {
+        name: 'Monthly',
+        rows: [
+          ['Category', 'Metric', 'Description', 'Panic #', 'Jan'],
+          ['Tickets', 'Opened', 'Desc', 'P: More than 50', '66'],
+        ],
+      },
+    ]);
+    filesToCleanup.push(sessionWorkbook);
+
+    const defaultWorkbook = createWorkbookFileWithSheets([
+      {
+        name: 'Weekly',
+        rows: [
+          ['Category', 'Metric', 'Description', 'Panic #', 'Week 1'],
+          ['Tickets', 'Opened', 'Desc', 'P: More than 50', '99'],
+        ],
+      },
+    ]);
+    filesToCleanup.push(defaultWorkbook);
+
+    process.env.SOURCE_SPREADSHEET = defaultWorkbook;
+
+    const result = getScorecardData({ cadence: 'weekly', workbookPath: sessionWorkbook });
+    expect(result.cadence).toBe('weekly');
+    expect(result.cadenceFallback).toBe(false);
+    expect(result.sheetName).toBe(WORKSHEET);
+    expect(result.metrics[0].latest.raw).toBe('47');
   });
 });

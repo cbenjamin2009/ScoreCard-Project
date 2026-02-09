@@ -1,6 +1,7 @@
 node_modules
 .next
 .cache
+coverage
 cypress/videos
 cypress/screenshots
 assets/*.xlsx
